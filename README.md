@@ -12,7 +12,7 @@ sequenceDiagram
     participant G as getatom.ru
     participant V as Ваш сервис (например crm.getatom.ru)
 
-    U->>G: GET /api/sso/crm (клик по кнопке/ссылке)
+    U->>G: GET /api/sso/crm (клик по кнопке; «crm» — код сервиса в реестре getatom)
     G->>G: Проверка сессии, выпуск JWT (RS256, TTL 60 сек, одноразовый)
     G-->>U: 302 Redirect → https://<ваш-сервис>/sso?token=<jwt>
     U->>V: GET /sso?token=<jwt>
