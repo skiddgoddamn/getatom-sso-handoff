@@ -11,9 +11,13 @@
 - Неизвестный/выключенный сервис или незаданный ключ → 404.
 - Целевой URL берётся **только из конфигурации** — redirect-параметры не принимаются, open redirect исключён by construction.
 
-### `GET /.well-known/jwks.json` — публичные ключи
+### `GET /api/public/sso/jwks.json` — публичные ключи
 
 JWK Set, публичный, `Cache-Control: max-age=600`. При невыставленном ключе — 404.
+Живёт под `/api/public/**`: этот префикс nginx маршрутизирует в бэкенд напрямую и
+он уже permitAll. Алиас `/.well-known/jwks.json` замаплен в контроллере, но
+снаружи не работает — nginx отдаёт путь фронтенду, а Next-rewrite на
+`https://getatom.ru/...` зациклился бы (поэтому rewrite убран).
 
 ## Конфигурация (env)
 
@@ -44,7 +48,6 @@ openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048
 
 ## Фронтенд (maxFrontend)
 
-- `next.config.ts`: rewrite `/.well-known/jwks.json → бэкенд` (путь вне `/api`, иначе Next отдал бы 404).
 - `AuthPageClient`: сохранённый `?redirect=`, указывающий на `/api/*`, после логина уходит `window.location.assign` (полная навигация) — это бэкенд-эндпоинт с 302, а не SPA-роут.
 - Точки входа — любая ссылка на `/api/sso/{service}` (кнопка в продукте, ссылка на лендинге партнёра). Отдельной кнопки в сайдбаре сейчас нет — вход со стороны партнёра.
 

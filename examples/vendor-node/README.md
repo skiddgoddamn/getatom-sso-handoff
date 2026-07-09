@@ -24,7 +24,7 @@ npm start
 
 ```bash
 GETATOM_ISSUER=https://getatom.ru \
-GETATOM_JWKS_URL=https://getatom.ru/.well-known/jwks.json \
+GETATOM_JWKS_URL=https://getatom.ru/api/public/sso/jwks.json \
 AUDIENCE=crm.getatom.ru \
 GETATOM_SSO_URL=https://getatom.ru/api/sso/crm \
 NODE_ENV=production \

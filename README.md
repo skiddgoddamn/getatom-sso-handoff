@@ -16,7 +16,7 @@ sequenceDiagram
     G->>G: Проверка сессии, выпуск JWT (RS256, TTL 60 сек, одноразовый)
     G-->>U: 302 Redirect → https://<ваш-сервис>/sso?token=<jwt>
     U->>V: GET /sso?token=<jwt>
-    V->>G: GET /.well-known/jwks.json (публичные ключи, кэшируются)
+    V->>G: GET /api/public/sso/jwks.json (публичные ключи, кэшируются)
     V->>V: Проверка подписи и claims → find-or-create user по sub
     V-->>U: Своя сессия + 302 Redirect → / (токен убран из URL)
 ```

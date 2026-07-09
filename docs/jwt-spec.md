@@ -47,7 +47,7 @@
 
 ## Публичные ключи (JWKS)
 
-- URL: `https://getatom.ru/.well-known/jwks.json`
+- URL: `https://getatom.ru/api/public/sso/jwks.json`
 - Формат — стандартный JWK Set (RFC 7517), ключи RSA с `kid`, `use: "sig"`, `alg: "RS256"`.
 - Партнёр кэширует набор ключей (рекомендуемый TTL кэша — 10 минут) и при неизвестном `kid` перечитывает JWKS один раз перед отказом.
 

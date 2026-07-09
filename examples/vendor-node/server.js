@@ -7,7 +7,7 @@
 //     Позволяет проверить интеграцию локально без доступа к getatom.
 //   - PROD: задайте env-переменные, и /sso начнёт принимать реальные токены getatom:
 //       GETATOM_ISSUER=https://getatom.ru
-//       GETATOM_JWKS_URL=https://getatom.ru/.well-known/jwks.json
+//       GETATOM_JWKS_URL=https://getatom.ru/api/public/sso/jwks.json
 //       AUDIENCE=crm.getatom.ru
 //       GETATOM_SSO_URL=https://getatom.ru/api/sso/crm
 
