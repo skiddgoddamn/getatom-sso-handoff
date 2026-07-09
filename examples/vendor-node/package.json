@@ -1,0 +1,16 @@
+{
+  "name": "getatom-sso-vendor-example",
+  "version": "1.0.0",
+  "description": "Пример интеграции сервиса-партнёра с SSO getatom: приём /sso?token=<jwt>",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jose": "^5.9.6"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
