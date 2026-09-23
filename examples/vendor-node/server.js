@@ -43,15 +43,21 @@ const users = new Map();
 /** Сессии партнёра: случайный sid → { sub } */
 const sessions = new Map();
 
-function findOrCreateUser(sub, name) {
-  let user = users.get(sub);
-  if (!user) {
-    user = { sub, name: name || 'Пользователь', createdAt: new Date().toISOString() };
-    users.set(sub, user);
-  } else if (name) {
-    user = { ...user, name };
-    users.set(sub, user);
+/** Данные из токена попадают в HTML — экранируем. */
+const esc = (v) => String(v).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+const PROFILE_CLAIMS = ['name', 'given_name', 'family_name', 'email', 'phone'];
+
+/** Find-or-create по sub; профиль обновляется из каждого свежего токена. */
+function findOrCreateUser(sub, payload) {
+  const profile = {};
+  for (const key of PROFILE_CLAIMS) {
+    // Нет claim — не стираем: оставляем последнее известное значение.
+    if (typeof payload[key] === 'string') profile[key] = payload[key];
   }
+  // email/phone getatom отдаёт только подтверждёнными — повторная верификация не нужна.
+  const user = { name: 'Пользователь', createdAt: new Date().toISOString(), ...users.get(sub), ...profile, sub };
+  users.set(sub, user);
   return user;
 }
 
@@ -111,7 +117,7 @@ app.get('/sso', async (req, res) => {
   }
 
   // Одноразовость: jti обязателен и не должен встречаться повторно.
-  const { jti, exp, sub, name } = payload;
+  const { jti, exp, sub } = payload;
   if (!jti || !sub) return res.status(403).send(errorPage('В токене нет обязательных полей.'));
   if (usedJti.has(jti)) {
     console.warn('[sso] ИНЦИДЕНТ: повторное использование jti', jti);
@@ -119,7 +125,7 @@ app.get('/sso', async (req, res) => {
   }
   usedJti.set(jti, (exp || 0) + CLOCK_TOLERANCE_SEC);
 
-  const user = findOrCreateUser(sub, typeof name === 'string' ? name : undefined);
+  const user = findOrCreateUser(sub, payload);
   createSession(res, user.sub);
 
   // Немедленный redirect: токен не должен остаться в адресной строке/истории/Referer.
@@ -153,8 +159,9 @@ app.get('/', (req, res) => {
   res.send(`<!doctype html><meta charset="utf-8"><title>CRM</title>
 <body style="font-family:sans-serif;max-width:480px;margin:80px auto">
 <h2>Вы в CRM</h2>
-<p>Привет, <b>${user.name}</b>!</p>
-<p>Ваш псевдонимный ID (sub): <code>${user.sub}</code></p>
+<p>Привет, <b>${esc(user.name)}</b>!</p>
+<p>Email: ${esc(user.email || '—')} · телефон: ${esc(user.phone || '—')} (подтверждены getatom)</p>
+<p>Ваш псевдонимный ID (sub): <code>${esc(user.sub)}</code></p>
 <p>Это всё, что CRM знает о пользователе getatom.</p>
 <p><a href="/logout">Выйти</a></p></body>`);
 });
@@ -178,7 +185,13 @@ if (MOCK) {
 
   // Имитация GET /api/sso/crm на стороне getatom: выпустить токен и редиректнуть на /sso.
   app.get('/mock-login', async (req, res) => {
-    const token = await new jose.SignJWT({ name: 'Иван (мок)' })
+    const token = await new jose.SignJWT({
+      name: 'Иван Петров (мок)',
+      given_name: 'Иван',
+      family_name: 'Петров (мок)',
+      email: 'ivan@example.com',
+      phone: '+79161234567',
+    })
       .setProtectedHeader({ alg: 'RS256', kid: 'mock-1' })
       .setIssuer(ISSUER)
       .setAudience(AUDIENCE)
