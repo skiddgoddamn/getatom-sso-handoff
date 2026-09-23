@@ -46,7 +46,7 @@ const sessions = new Map();
 /** Данные из токена попадают в HTML — экранируем. */
 const esc = (v) => String(v).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-const PROFILE_CLAIMS = ['name', 'given_name', 'family_name', 'email', 'phone'];
+const PROFILE_CLAIMS = ['name', 'given_name', 'family_name', 'email', 'phone', 'picture'];
 
 /** Find-or-create по sub; профиль обновляется из каждого свежего токена. */
 function findOrCreateUser(sub, payload) {
